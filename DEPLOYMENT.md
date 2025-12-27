@@ -1,14 +1,13 @@
 # MobiPlan cPanel Deployment Guide
 
-This guide covers deploying MobiPlan (Django + Next.js) to cPanel with GitHub CI/CD.
+This guide covers deploying MobiPlan (Django + Next.js) to cPanel using Git.
 
 ## Prerequisites
 
 - cPanel hosting with:
   - Python App support (Python 3.10+)
   - Node.js App support (Node.js 18+)
-  - SSH access enabled
-  - Git access
+  - Git Version Control (built into cPanel)
 - GitHub repository
 - Domain configured in cPanel
 
@@ -23,14 +22,17 @@ api.yourdomain.com      → Django Backend (Passenger WSGI)
 
 ## Step 1: Initial Server Setup
 
-### 1.1 SSH into your cPanel server
+### 1.1 Clone repository via cPanel Git
 
-```bash
-ssh yourusername@yourdomain.com
-```
+1. Go to cPanel → **Git™ Version Control**
+2. Click **Create**
+3. Configure:
+   - Clone URL: `https://github.com/yourusername/mobiplan.git`
+   - Repository Path: `mobiplan`
+   - Repository Name: `mobiplan`
+4. Click **Create**
 
-### 1.2 Clone the repository
-
+Alternatively, use cPanel Terminal:
 ```bash
 cd ~
 git clone https://github.com/yourusername/mobiplan.git
@@ -181,46 +183,85 @@ In cPanel Node.js App, click **Restart**.
 
 ---
 
-## Step 4: GitHub CI/CD Setup
+## Step 4: Git-Based Deployment
 
-### 4.1 Generate SSH key for deployment
+### 4.1 Setup Git in cPanel
 
-On your local machine:
+1. Go to cPanel → **Git™ Version Control**
+2. Click **Create** to add a new repository
+3. Configure:
+   - Clone URL: `https://github.com/yourusername/mobiplan.git`
+   - Repository Path: `mobiplan`
+   - Repository Name: `mobiplan`
+4. Click **Create**
+
+### 4.2 Configure Git credentials (for private repos)
+
+If your repository is private:
+
+1. Go to GitHub → **Settings** → **Developer settings** → **Personal access tokens**
+2. Generate a new token with `repo` scope
+3. In cPanel Terminal or SSH:
 ```bash
-ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/mobiplan_deploy
+git config --global credential.helper store
+cd ~/mobiplan
+git pull  # Enter your GitHub username and token when prompted
 ```
 
-### 4.2 Add public key to cPanel
+### 4.3 Deploy workflow
 
-1. SSH into cPanel server
-2. Add the public key to `~/.ssh/authorized_keys`:
+**From cPanel Git Version Control:**
+1. Go to cPanel → **Git™ Version Control**
+2. Find your repository and click **Manage**
+3. Click **Pull or Deploy** → **Update from Remote**
+
+**Or from cPanel Terminal:**
 ```bash
-cat >> ~/.ssh/authorized_keys << 'EOF'
-YOUR_PUBLIC_KEY_HERE
-EOF
+cd ~/mobiplan
+git pull origin main
+
+# Deploy backend
+cd backend
+chmod +x deploy.sh
+./deploy.sh
+
+# Deploy frontend  
+cd ../frontend
+chmod +x deploy.sh
+./deploy.sh
 ```
 
-### 4.3 Add secrets to GitHub
+### 4.4 Optional: Setup .cpanel.yml for auto-deployment
 
-Go to your GitHub repo → **Settings** → **Secrets and variables** → **Actions**
+Create `.cpanel.yml` in your repo root for automatic deployment on git pull:
 
-Add these secrets:
-| Secret Name | Value |
-|-------------|-------|
-| `CPANEL_HOST` | Your cPanel server hostname (e.g., `server123.web-hosting.com`) |
-| `CPANEL_USERNAME` | Your cPanel username |
-| `SSH_PRIVATE_KEY` | Contents of `~/.ssh/mobiplan_deploy` (private key) |
-| `SSH_PORT` | `22` (or your custom SSH port) |
+```yaml
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/yourusername/mobiplan
+    # Backend deployment
+    - cd $DEPLOYPATH/backend
+    - /home/yourusername/virtualenv/mobiplan/backend/3.10/bin/pip install -r requirements.txt
+    - /home/yourusername/virtualenv/mobiplan/backend/3.10/bin/python manage.py migrate --noinput
+    - /home/yourusername/virtualenv/mobiplan/backend/3.10/bin/python manage.py collectstatic --noinput
+    - touch $DEPLOYPATH/backend/tmp/restart.txt
+    # Frontend deployment
+    - cd $DEPLOYPATH/frontend
+    - source /home/yourusername/nodevenv/mobiplan/frontend/18/bin/activate && npm ci
+    - source /home/yourusername/nodevenv/mobiplan/frontend/18/bin/activate && npm run build
+```
 
-### 4.4 Push to trigger deployment
+### 4.5 Push and deploy
 
 ```bash
+# On your local machine
 git add .
-git commit -m "Setup CI/CD deployment"
+git commit -m "Your changes"
 git push origin main
-```
 
-The GitHub Action will automatically deploy when you push to `main`.
+# Then in cPanel, pull the changes to deploy
+```
 
 ---
 
@@ -296,12 +337,9 @@ DATABASES = {
 
 ## Manual Deployment
 
-If CI/CD fails, deploy manually:
+Deploy manually via cPanel Terminal:
 
 ```bash
-# SSH into server
-ssh yourusername@yourdomain.com
-
 # Pull latest changes
 cd ~/mobiplan
 git pull origin main
@@ -327,4 +365,4 @@ chmod +x deploy.sh
 - [ ] CORS properly configured
 - [ ] Database credentials secured
 - [ ] Google Sheets credentials not in git
-- [ ] SSH key with limited permissions
+- [ ] `.env` files not committed to git

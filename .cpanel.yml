@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    # Create directories if they don't exist
+    - mkdir -p /home/mobiplan/public_html/api
+    # Restart backend after pull
+    - touch /home/mobiplan/repositories/mobiplan/backend/tmp/restart.txt
