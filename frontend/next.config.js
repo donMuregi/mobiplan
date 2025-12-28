@@ -1,7 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactCompiler: true,
   output: 'standalone',
   images: {
@@ -23,7 +21,6 @@ const nextConfig: NextConfig = {
         hostname: '127.0.0.1',
       },
       {
-        // Production API domain - update this with your actual domain
         protocol: 'https',
         hostname: '*.mobiplan.co.ke',
       },
@@ -35,4 +32,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
