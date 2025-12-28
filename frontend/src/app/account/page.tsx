@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
@@ -30,7 +30,7 @@ interface Order {
 
 type TabType = 'overview' | 'orders' | 'wishlist' | 'settings';
 
-export default function AccountPage() {
+function AccountPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuthenticated, isLoading, logout, updateProfile, fetchProfile } = useAuthStore();
@@ -512,5 +512,13 @@ export default function AccountPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-orange-500" /></div>}>
+      <AccountPageContent />
+    </Suspense>
   );
 }

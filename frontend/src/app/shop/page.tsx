@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Filter, X, ChevronDown, ChevronRight, Grid, List, SlidersHorizontal } from 'lucide-react';
+import { Filter, X, ChevronDown, ChevronRight, Grid, List, SlidersHorizontal, Loader2 } from 'lucide-react';
 import ProductCard from '@/components/product/ProductCard';
 import { api } from '@/lib/api';
 import { Product, Category, Brand } from '@/types';
@@ -93,7 +93,7 @@ function CategoryItem({
   );
 }
 
-export default function ShopPage() {
+function ShopPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -560,5 +560,13 @@ export default function ShopPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-900 flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-orange-500" /></div>}>
+      <ShopPageInner />
+    </Suspense>
   );
 }
