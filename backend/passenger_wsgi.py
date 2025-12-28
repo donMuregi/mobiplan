@@ -1,23 +1,14 @@
-#!/usr/bin/env python
-"""
-WSGI config for cPanel Passenger deployment.
-This file is used by cPanel's Passenger to run the Django application.
-"""
 import os
 import sys
 
-# Add the project directory to the path
-project_home = os.path.dirname(os.path.abspath(__file__))
-if project_home not in sys.path:
-    sys.path.insert(0, project_home)
+from django.core.wsgi import get_wsgi_application
 
-# Add the parent directory (for imports)
-parent_dir = os.path.dirname(project_home)
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
+# Set up paths and environment variables
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+os.environ['DJANGO_SETTINGS_MODULE'] = 'mobiplan.settings'
 
 # Load environment variables from .env file
-env_file = os.path.join(project_home, '.env')
+env_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
 if os.path.exists(env_file):
     with open(env_file) as f:
         for line in f:
@@ -26,7 +17,25 @@ if os.path.exists(env_file):
                 key, value = line.split('=', 1)
                 os.environ.setdefault(key.strip(), value.strip())
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mobiplan.settings')
+# Set script name for the PATH_INFO fix below
+SCRIPT_NAME = ''
 
-from django.core.wsgi import get_wsgi_application
+class PassengerPathInfoFix(object):
+    """
+    Sets PATH_INFO from REQUEST_URI because Passenger doesn't provide it.
+    """
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        from urllib.parse import unquote
+        environ['SCRIPT_NAME'] = SCRIPT_NAME
+        request_uri = unquote(environ['REQUEST_URI'])
+        script_name = unquote(environ.get('SCRIPT_NAME', ''))
+        offset = request_uri.startswith(script_name) and len(environ['SCRIPT_NAME']) or 0
+        environ['PATH_INFO'] = request_uri[offset:].split('?', 1)[0]
+        return self.app(environ, start_response)
+
+# Set the application
 application = get_wsgi_application()
+application = PassengerPathInfoFix(application)
