@@ -1,0 +1,15 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/mfi-sacco-partnership/layout,_N_T_/mfi-sacco-partnership/page,_N_T_/mfi-sacco-partnership"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/mfi-sacco-partnership/__PAGE__",
+    "/mfi-sacco-partnership",
+    "/_index",
+    "/_head"
+  ]
+}

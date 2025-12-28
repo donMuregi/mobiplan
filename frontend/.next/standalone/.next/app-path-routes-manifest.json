@@ -1,0 +1,17 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/about/page": "/about",
+  "/account/page": "/account",
+  "/cart/page": "/cart",
+  "/checkout/page": "/checkout",
+  "/favicon.ico/route": "/favicon.ico",
+  "/login/page": "/login",
+  "/mfi-sacco-partnership/page": "/mfi-sacco-partnership",
+  "/page": "/",
+  "/product/[slug]/page": "/product/[slug]",
+  "/register/page": "/register",
+  "/search/page": "/search",
+  "/shop/page": "/shop",
+  "/smart-farmer-smartphone-program/page": "/smart-farmer-smartphone-program"
+}
