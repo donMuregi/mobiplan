@@ -18,7 +18,7 @@ logger.info(f"Current working directory: {os.getcwd()}")
 logger.info(f"Script location: {os.path.dirname(os.path.abspath(__file__))}")
 
 # Path to your virtual environment's Python interpreter
-INTERP = "/home/mobiplan/virtualenv/repositories/mobiplan/backend/3.10/bin/python3"
+INTERP = "/home/mobiplan/virtualenv/repositories/mobiplan/backend/3.13/bin/python3"
 logger.info(f"Expected interpreter: {INTERP}")
 
 if sys.executable != INTERP:
